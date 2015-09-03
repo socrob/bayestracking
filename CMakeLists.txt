@@ -56,7 +56,8 @@ if(catkin_FOUND)
 else(catkin_FOUND)
   find_package(Boost 1.54.0 REQUIRED)
   find_package(OpenCV 2.4 REQUIRED)
-  include_directories(${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+  set(INCLUDE_DIRS_EXTRA ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+  include_directories(${INCLUDE_DIRS_EXTRA})
   link_directories(${Boost_LIBRARY_DIRS} ${OpenCV_LIBRARY_DIRS})
   target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
@@ -65,6 +66,13 @@ else(catkin_FOUND)
   set(PACKAGE_LIB_DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
   set(PACKAGE_BIN_DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
   set(PACKAGE_INCLUDE_DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/)
+  set(PACKAGE_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+  set(PACKAGE_CONFIG_DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/)
+  configure_file(bayes_trackingConfig.cmake.in "${PROJECT_BINARY_DIR}/bayes_trackingConfig.cmake" @ONLY)
+  configure_file(bayes_trackingConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/bayes_trackingConfigVersion.cmake" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/bayes_trackingConfig.cmake" "${PROJECT_BINARY_DIR}/bayes_trackingConfigVersion.cmake" 
+    DESTINATION "${PACKAGE_CONFIG_DESTINATION}"
+  )
 endif(catkin_FOUND)
 
 install(TARGETS ${PROJECT_NAME}
@@ -78,7 +86,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
   PATTERN ".svn" EXCLUDE
 )
 
-add_subdirectory(examples)
+## Optional builds: examples
+OPTION (BAYESTRACKING_BUILD_EXAMPLES "Generates example programs" ON)
+if(BAYESTRACKING_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif(BAYESTRACKING_BUILD_EXAMPLES)
 
 ## Optional builds: documentation
 OPTION (BAYESTRACKING_BUILD_DOC "Generates API documentation" OFF)

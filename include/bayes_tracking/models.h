@@ -66,6 +66,48 @@ public:
    }
 };
 
+
+/**
+ * Constant velocity prediction model for linear human motion
+ * Noises are modelled as accelerations
+ */
+class CVModelBase :
+  public JacobianModel,
+  public Linrz_predict_model,
+  public Sampled_predict_model
+{
+  /**
+  * Definition of sampler for additive noise model given state x
+  *  Generate Gaussian correlated samples
+  * Precond: init_GqG, automatic on first use
+  */
+  virtual const FM::Vec& fw(const FM::Vec& x) const = 0;
+
+  /** initialise predict given a change to q,G
+  *  Implementation: Update rootq
+  */
+  virtual void init_GqG() const = 0;
+
+  /**
+  * Non-linear prediction model
+  * @param x State vector x(k-1)
+  * @return A-priori estimation x^(k)
+  */
+  virtual const FM::Vec& f(const FM::Vec& x) const = 0;
+
+  /**
+  * Model update, to be called before prediction
+  * @param dt Time interval since last estimation
+  */
+  virtual void update(double dt) = 0;
+
+  /**
+  * Model update, to be called before prediction
+  * @param x State vector around which the linearization is done (update Jacobian)
+  */
+  virtual void updateJacobian(const FM::Vec& x) = 0;
+};
+
     //==========================================================================
     //============================== 2D CVModel ================================
     //==========================================================================
@@ -75,9 +117,7 @@ public:
  * Noises are modelled as accelerations
  */
 class CVModel :
-  public JacobianModel,
-  public Linrz_predict_model,
-  public Sampled_predict_model
+  public CVModelBase
 {
 public:
   /** Size of the human state */
@@ -136,6 +176,34 @@ private:
   mutable bool first_init;
 };
 
+/**
+ * Cartesian observation model
+ */
+class CartesianModelBase : public JacobianModel,
+  public Linrz_correlated_observe_model, public Likelihood_observe_model
+{
+
+  /**
+  * Non-linear observation model
+  * @param x A-priori estimated state vector x^(k)
+  * @return Estimated observations z^(k)
+  */
+  virtual const FM::Vec& h(const FM::Vec& x) const = 0;
+
+  /**
+  * Model update, to be called before observation/correction
+  * @param x State vector around which the linearization is done (update Jacobian)
+  */
+  virtual void updateJacobian(const FM::Vec& x) = 0;
+
+  /**
+  * Normalize the angular components of the observation model
+  * @param z_denorm
+  * @param z_from
+  */
+  virtual void normalise(FM::Vec& z_denorm, const FM::Vec& z_from) const = 0;
+};
+
     //==========================================================================
     //==================== 2D Cartesian observation model=======================
     //==========================================================================
@@ -143,8 +211,7 @@ private:
 /**
  * Cartesian observation model
  */
-class CartesianModel : public JacobianModel,
-  public Linrz_correlated_observe_model, public Likelihood_observe_model
+class CartesianModel : public CartesianModelBase
 {
 public:
   /** Size of the state vector */
@@ -218,9 +285,7 @@ private:
     //==========================================================================
 
     class CVModel3D :
-    public JacobianModel,
-    public Linrz_predict_model,
-    public Sampled_predict_model {
+    public CVModelBase {
     public:
         /** Size of the human state */
         static const std::size_t x_size = 6;
@@ -283,8 +348,7 @@ private:
     //==================== 3D Cartesian observation model=======================
     //==========================================================================
 
-    class CartesianModel3D : public JacobianModel,
-    public Linrz_correlated_observe_model, public Likelihood_observe_model {
+    class CartesianModel3D : public CartesianModelBase {
     public:
         /** Size of the state vector */
         static const std::size_t x_size = 6;

@@ -33,9 +33,15 @@ using namespace Models;
 //                      CV PREDICTION MODEL
 //*************************************************************************
 
-CVModel::CVModel(Float wxSD, Float wySD) :
+CVModelBase::CVModelBase(std::size_t x_size, std::size_t q_size) :
    Linrz_predict_model(x_size, q_size),
-   Sampled_predict_model(),
+   Sampled_predict_model()
+{
+
+}
+
+CVModel::CVModel(Float wxSD, Float wySD) :
+   CVModelBase(x_size, q_size),
    fx(x_size),
    genn(rnd),
    xp(x_size),
@@ -158,9 +164,15 @@ void CVModel::init_GqG() const
 //                  2D CARTESIAN SUBTRACTION OBSERVATION MODEL
 //*************************************************************************
 
+CartesianModelBase::CartesianModelBase(std::size_t x_size, std::size_t z_size) :
+    Linrz_correlated_observe_model(x_size, z_size),
+    Likelihood_observe_model(z_size)
+{
+
+}
+
 CartesianModel::CartesianModel(Float xSD, Float ySD) :
-   Linrz_correlated_observe_model(x_size, z_size),
-   Likelihood_observe_model(z_size),
+   CartesianModelBase(x_size, z_size),
    z_pred(z_size),
    li(z_size)
 {
@@ -244,8 +256,7 @@ void CartesianModel::normalise(FM::Vec& z_denorm, const FM::Vec& z_from) const {
 //*************************************************************************
 
    CVModel3D::CVModel3D(Float wxSD, Float wySD, Float wzSD) :
-   Linrz_predict_model(x_size, q_size),
-   Sampled_predict_model(),
+   CVModelBase(x_size, q_size),
    fx(x_size),
    genn(rnd),
    xp(x_size),
@@ -398,8 +409,7 @@ void CVModel3D::init_GqG() const
 //*************************************************************************
 
 CartesianModel3D::CartesianModel3D(Float xSD, Float ySD, Float zSD) :
-   Linrz_correlated_observe_model(x_size, z_size),
-   Likelihood_observe_model(z_size),
+   CartesianModelBase(x_size, z_size),
    z_pred(z_size),
    li(z_size)
 {

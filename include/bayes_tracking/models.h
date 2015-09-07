@@ -76,6 +76,9 @@ class CVModelBase :
   public Linrz_predict_model,
   public Sampled_predict_model
 {
+public:
+  CVModelBase(std::size_t x_size, std::size_t q_size);
+
   /**
   * Definition of sampler for additive noise model given state x
   *  Generate Gaussian correlated samples
@@ -182,6 +185,8 @@ private:
 class CartesianModelBase : public JacobianModel,
   public Linrz_correlated_observe_model, public Likelihood_observe_model
 {
+public:
+  CartesianModelBase(std::size_t x_size, std::size_t z_size);
 
   /**
   * Non-linear observation model

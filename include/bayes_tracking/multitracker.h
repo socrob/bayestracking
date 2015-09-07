@@ -130,6 +130,9 @@ public:
     return m_filters.size();
   }
 
+  std::map<int, int> assignments() const {
+    return m_assignments;
+  }
 
   /**
    * Return a particular filter of the multitracker

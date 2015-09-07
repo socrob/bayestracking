@@ -35,7 +35,7 @@ using namespace Bayesian_filter_matrix;
 namespace jpda
 {
 
-double Gauss(const Vec& s, const SymMatrix& S) {
+inline double Gauss(const Vec& s, const SymMatrix& S) {
    SymMatrix Si(S.size1(), S.size2());
    Float detS;
    Float rcond = UdUinversePD(Si, detS, S);  // Si = inv(S)
@@ -45,7 +45,7 @@ double Gauss(const Vec& s, const SymMatrix& S) {
    return exp(-0.5*(inner_prod(trans(s),prod(Si, s)))) / sqrt(pow(2*M_PI, (double)s.size())*detS);
 }
 
-double logGauss(const Vec& s, const SymMatrix& S) {
+inline double logGauss(const Vec& s, const SymMatrix& S) {
    SymMatrix Si(S.size1(), S.size2());
    Float detS;
    Float rcond = UdUinversePD(Si, detS, S);  // Si = inv(S)

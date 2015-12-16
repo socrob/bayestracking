@@ -67,7 +67,7 @@ else(catkin_FOUND)
   set(PACKAGE_BIN_DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
   set(PACKAGE_INCLUDE_DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_NAME}/)
   set(PACKAGE_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
-  set(PACKAGE_CONFIG_DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/)
+  set(PACKAGE_CONFIG_DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/cmake/)
   configure_file(bayes_trackingConfig.cmake.in "${PROJECT_BINARY_DIR}/bayes_trackingConfig.cmake" @ONLY)
   configure_file(bayes_trackingConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/bayes_trackingConfigVersion.cmake" @ONLY)
   install(FILES "${PROJECT_BINARY_DIR}/bayes_trackingConfig.cmake" "${PROJECT_BINARY_DIR}/bayes_trackingConfigVersion.cmake" 

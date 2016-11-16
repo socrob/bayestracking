@@ -55,13 +55,11 @@ if(catkin_FOUND)
   set(PACKAGE_INCLUDE_DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 else(catkin_FOUND)
   find_package(Boost 1.54.0 REQUIRED)
-  find_package(OpenCV 2.4 REQUIRED)
-  set(INCLUDE_DIRS_EXTRA ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+  set(INCLUDE_DIRS_EXTRA ${Boost_INCLUDE_DIRS})
   include_directories(${INCLUDE_DIRS_EXTRA})
-  link_directories(${Boost_LIBRARY_DIRS} ${OpenCV_LIBRARY_DIRS})
+  link_directories(${Boost_LIBRARY_DIRS})
   target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
-    ${OpenCV_LIBRARIES}
   )
   set(PACKAGE_LIB_DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
   set(PACKAGE_BIN_DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
@@ -74,6 +72,12 @@ else(catkin_FOUND)
     DESTINATION "${PACKAGE_CONFIG_DESTINATION}"
   )
 endif(catkin_FOUND)
+
+#add opencv
+find_package(OpenCV 2.4 REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_directories(${OpenCV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION ${PACKAGE_LIB_DESTINATION}

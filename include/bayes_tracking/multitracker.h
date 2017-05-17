@@ -78,7 +78,7 @@ public:
    * @param sequenceSize Minimum number of unmatched observations to create new track hypothesis
    * @param sequenceTime Maximum time interval between these observations
    */
-  MultiTracker(unsigned int sequenceSize = 5, double sequenceTime = 0.2)
+  MultiTracker(unsigned int sequenceSize = 2, double sequenceTime = 0.5)
   {
     m_filterNum = 0;
     m_seqSize = sequenceSize;

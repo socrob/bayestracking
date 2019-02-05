@@ -32,11 +32,14 @@ struct observation_t {
   FM::Vec vec;
   double time;
   string tag;
+  long unsigned id;
+
   // constructors
   observation_t() : vec(Empty), time(0.) {}
   observation_t(FM::Vec v) : vec(v) {}
   observation_t(FM::Vec v, double t) : vec(v), time(t) {}
   observation_t(FM::Vec v, double t, string f) : vec(v), time(t), tag(f) {}
+  observation_t(FM::Vec v, double t, string f, long unsigned i) : vec(v), time(t), tag(f), id(i) {}
 };
 
 typedef std::vector<observation_t> sequence_t;
@@ -65,7 +68,7 @@ public:
 
 private:
   std::vector<filter_t> m_filters;
-  int m_filterNum;
+  long unsigned int m_filterNum;
   sequence_t m_observations;            // observations
   std::vector<size_t> m_unmatched;      // unmatched observations
   std::vector<FM::Vec> m_prevUnmatched; // previously unmatched observations
@@ -77,9 +80,8 @@ public:
   /**
    * Constructor
    */
-  MultiTracker()
-  {
-    m_filterNum = 0;
+  MultiTracker() {
+      m_filterNum = 0;
   }
 
 
@@ -101,7 +103,13 @@ public:
    * @param time Timestamp
    * @param an optional tag use to distinguish objects from each other
    */
-  void addObservation(const FM::Vec& z, double time, string tag = "") 
+
+  void addObservation(const FM::Vec &z, double time, long unsigned id, string tag = "")
+  {
+      m_observations.push_back(observation_t(z, time, tag, id));
+  }
+
+  void addObservation(const FM::Vec& z, double time, string tag = "")
   {
       m_observations.push_back(observation_t(z, time, tag));
   }
@@ -176,7 +184,28 @@ public:
     // finished
     cleanup();
   }
-  
+
+  template<class ObservationModelType>
+  void process(std::map<long, int> &assignments, ObservationModelType& om, association_t alg = NN, unsigned int seqSize = 5, double seqTime = 0.2, double stdLimit = 1.0, observ_model_t om_flag = CARTESIAN)
+  {
+    // data association
+    if (dataAssociation(om, alg)) {
+      // update
+      observe(om);
+    }
+    pruneTracks(stdLimit);
+    if (m_observations.size())
+      createTracks(om, seqSize, seqTime, om_flag);
+
+    typename std::map<int, int>::iterator ai, aiEnd = m_assignments.end();
+    for (ai = m_assignments.begin(); ai != aiEnd; ai++) {
+      assignments.insert(std::make_pair(m_observations[ai->first].id, ai->second));
+    }
+
+      // finished
+    cleanup();
+  }
+
   /**
    * Print state and covariance of all the current filters
    */
@@ -250,7 +279,7 @@ void addFilter(FilterType* filter, observation_t& observation)
                     {
                         amat[i][j] = DBL_MAX;
                         continue;
-                    } 
+                    }
                 }
             }
             s = zp - m_observations[i].vec;
@@ -380,6 +409,7 @@ private:
   template<class ObservationModelType>
   void createTracks(ObservationModelType& om, unsigned int seqSize, double seqTime, observ_model_t om_flag)
   {
+
     // create new tracks from unmatched observations
     std::vector<size_t>::iterator ui = m_unmatched.begin();
     while (ui != m_unmatched.end()) {
@@ -390,11 +420,13 @@ private:
           si = m_sequences.erase(si);
         }
         else if (AM::mahalanobis(m_observations[*ui].vec, om.Z, si->back().vec, om.Z) <= AM::gate(om.z_size)) { // observation close to a previous one
+
           // add new track
           si->push_back(m_observations[*ui]);
           FilterType* filter;
           if (si->size() >= seqSize && initialize(filter, *si, om_flag)) {  // there's a minimum number of sequential observations
-            addFilter(filter, m_observations[*ui]);
+
+              addFilter(filter, m_observations[*ui]);
             // remove sequence
             si = m_sequences.erase(si);
             matched = true;

@@ -96,7 +96,7 @@ public:
     }
   }
 
-  
+
   /**
    * Add a new observation
    * @param z Observation vector
@@ -114,7 +114,7 @@ public:
       m_observations.push_back(observation_t(z, time, tag));
   }
 
-  
+
   /**
    * Remove observations
    */
@@ -125,7 +125,7 @@ public:
     m_assignments.clear();
   }
 
-  
+
   /**
    * Size of the multitracker
    * @return Current number of filters
@@ -145,7 +145,7 @@ public:
   {
     return m_filters[i];
   }
-  
+
 
   /**
    * Perform prediction step for all the current filters
@@ -217,7 +217,7 @@ public:
       cout << "Filter[" << i++ << "]\n\tx = " << fi->filter->x << "\n\tX = " << fi->filter->X << endl;
     }
   }
-  
+
 
 private:
 
@@ -233,14 +233,14 @@ void addFilter(FilterType* filter, observation_t& observation)
     filter_t f = {m_filterNum++, filter, observation.tag};
     m_filters.push_back(f);
   }
-  
+
   void addFilter(FilterType* filter)
   {
     filter_t f = {m_filterNum++, filter};
     m_filters.push_back(f);
   }
-  
-  
+
+
   template<class ObservationModelType>
   bool dataAssociation(ObservationModelType& om, association_t alg = NN)
   {
@@ -267,7 +267,7 @@ void addFilter(FilterType* filter, observation_t& observation)
         for (int i = 0; i < M; i++) {
 
             // Only Check NN_LABELED, NNJPDA_LABELED tag associate not yet implemented
-            if (alg == NN_LABELED || alg == NNJPDA_LABELED) 
+            if (alg == NN_LABELED || alg == NNJPDA_LABELED)
             {
                 // if either tag is empty, continue associating as if it was unlabelled
                 if (
@@ -275,7 +275,7 @@ void addFilter(FilterType* filter, observation_t& observation)
                     m_filters[j].tag.length() > 0
                     ) {
                     // Assign maximum cost if observations and trajectories labelled do not match
-                    if (m_observations[i].tag != m_filters[j].tag) 
+                    if (m_observations[i].tag != m_filters[j].tag)
                     {
                         amat[i][j] = DBL_MAX;
                         continue;
@@ -290,7 +290,7 @@ void addFilter(FilterType* filter, observation_t& observation)
                 }
                 else {
                     amat[i][j] = AM::correlation_log(s, S);
-                    if (alg == NNJPDA || alg == NNJPDA_LABELED) 
+                    if (alg == NNJPDA || alg == NNJPDA_LABELED)
                     {
                         jpda->Omega[0][i][j+1] = true;
                         jpda->Lambda[0][i][j+1] = jpda::logGauss(s, S);
@@ -347,6 +347,24 @@ void addFilter(FilterType* filter, observation_t& observation)
   }
 
 public:
+
+
+    void deleteTrack(unsigned long id)
+    {
+        // remove a track
+        typename std::vector<filter_t>::iterator fi = m_filters.begin(), fiEnd = m_filters.end();
+        while (fi != fiEnd) {
+            if (fi->id == id) {
+                delete fi->filter;
+                fi = m_filters.erase(fi);
+                break;
+            }
+            else {
+                fi++;
+            }
+        }
+    }
+
   void pruneTracks(double stdLimit = 1.0)
   {
     // remove lost tracks
@@ -367,8 +385,8 @@ public:
   {
     // remove lost tracks
     typename std::vector<filter_t>::iterator fi = m_filters.begin(), fiEnd = m_filters.end();
-    std::map<std::string, double> min_named; 
-    std::map<std::string, long> best_named; 
+    std::map<std::string, double> min_named;
+    std::map<std::string, long> best_named;
     while (fi != fiEnd) {
         if (fi->tag.length() > 0) {
             if (min_named.count(fi->tag) == 0) {

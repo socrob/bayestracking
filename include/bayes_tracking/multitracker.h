@@ -358,7 +358,6 @@ public:
                 delete fi->filter;
                 fi = m_filters.erase(fi);
                 break;
-//          fiEnd = m_filters.end();
             }
             else {
                 fi++;
